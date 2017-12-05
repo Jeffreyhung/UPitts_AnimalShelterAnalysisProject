@@ -1,0 +1,230 @@
+<?php
+	$conn = mysqli_connect("localhost", "root", "root","dbms_final");
+	//$conn = mysqli_connect("localhost", "id3379293_upitts", "31415926","id3379293_animal_shelter");
+	if (!$conn) {
+		die("Connection failed: " . mysqli_connect_error());
+	}
+	
+	//return dogs and cats
+			$return_dog_cat = mysqli_query($conn, "SELECT * FROM return_dog_cat");
+			$return_dog_cat_data=array();
+			$i=0;
+			while($row = mysqli_fetch_assoc($return_dog_cat)) {
+				$return_dog_cat_data[$i] = $row['num'];
+				$i += 1;
+			}
+	//adoption_color
+			$color_array = array();
+			$color_adopt_data =array();
+			$color = mysqli_query($conn, "SELECT column_name FROM information_schema.columns WHERE table_name='color_table' AND table_schema='dbms_final';");
+			while($row = mysqli_fetch_assoc($color)) {
+				if($row["column_name"] == "animal_ID"){
+					continue;
+				}
+				$color_array[] = $row["column_name"];
+			}
+			foreach ($color_array as $value) {
+				$adopt_color = mysqli_query($conn, "SELECT count('$value') result FROM color_table c, outcome_table o WHERE $value!='null' AND c.animal_ID = o.animalID AND o.type=0");
+				$row = mysqli_fetch_assoc($adopt_color);
+				$point = array("y" => (int)$row["result"], "label" =>$value);
+				array_push($color_adopt_data, $point);
+			}
+		//adoption_breed
+			$breed_array = array();
+			$breed_adopt_data =array();
+			$breed = mysqli_query($conn, "SELECT column_name FROM information_schema.columns WHERE table_name='breed_table' AND table_schema='dbms_final';");
+			while($row = mysqli_fetch_assoc($breed)) {
+				if($row["column_name"] == "animal_ID"){
+					continue;
+				}
+				$breed_array[] = $row["column_name"];
+			}
+			foreach ($breed_array as $value) {
+				$adopt_breed = mysqli_query($conn, "SELECT count('$value') result FROM breed_table b, outcome_table o WHERE $value!='null' AND b.animal_ID = o.animalID AND o.type=0");
+				$row = mysqli_fetch_assoc($adopt_breed);
+				$point = array("y" => (int)$row["result"], "label" =>$value);
+				array_push($breed_adopt_data, $point);
+			}
+		
+		
+?>
+<head>
+<script>
+			window.onload = function () {
+			//return of dogs and cats
+				var chart14 = new CanvasJS.Chart("returndogcat",{
+					theme: "theme2",
+					backgroundColor: "",
+					title:{
+						text: "Number of Dogs and Cats that Return to Owner",
+					},
+					data: [
+					{
+						type: "pie",
+						showInLegend: true,
+						toolTipContent: "{y} - #percent %",
+						legendText: "{indexLabel} - #percent %",
+						dataPoints: [
+							{ y: <?php echo $return_dog_cat_data[0] ?>, indexLabel:"Dog"},
+							{ y: <?php echo $return_dog_cat_data[1] ?>, indexLabel:"Cat"}
+						]
+					}
+					]
+				});
+				chart14.render();
+			//relation of adopt and color
+				var chart6 = new CanvasJS.Chart("relationofadoptandcolor", {
+					backgroundColor: "",
+					zoomEnabled: true, 
+					axisY: {
+						title: "Numbers",
+						includeZero: true,
+					},
+					title:{
+						text: "Relation between Adoption and Color"
+					},
+					data: [
+					{
+						type: "column",  
+						legendMarkerColor: "grey",
+						dataPoints: <?php echo json_encode($color_adopt_data); ?>
+					}
+					]
+				});
+				chart6.render();
+			//relation of adopt and Breed
+				var chart7 = new CanvasJS.Chart("relationofadoptandbreed", {
+					backgroundColor: "",
+					zoomEnabled: true, 
+					axisY: {
+						title: "Numbers",
+						includeZero: true,
+					},
+					title:{
+						text: "Relation between Adoption and Breed"
+					},
+					data: [
+					{
+						type: "column",  
+						legendMarkerColor: "grey",
+						dataPoints: <?php echo json_encode($breed_adopt_data); ?>
+					}
+					]
+				});
+				chart7.render();
+			
+			};
+</script>
+</head>
+
+<body>
+<div class="section" id="sect11"><p id="returndogcat" style="height: 400px; width: 50%;"></p></div>
+<div class="section" id="sect6"><p id="relationofadoptandcolor" style="height: 400px; width: 70%;"></p></div>
+<div class="section" id="sect7"><p id="relationofadoptandbreed" style="height: 400px; width: 100%;"></p></div>
+			
+</body>
+<!--
+CREATE VIEW outcome_time_dog AS
+SELECT 
+	o.type,
+	COUNT(CASE WHEN HOUR(`time`) = 0 THEN 1 END) AS `0`,
+	COUNT(CASE WHEN HOUR(`time`) = 1 THEN 1 END) AS `1`,
+	COUNT(CASE WHEN HOUR(`time`) = 2 THEN 1 END) AS `2`,
+	COUNT(CASE WHEN HOUR(`time`) = 3 THEN 1 END) AS `3`,
+	COUNT(CASE WHEN HOUR(`time`) = 4 THEN 1 END) AS `4`,
+	COUNT(CASE WHEN HOUR(`time`) = 5 THEN 1 END) AS `5`,
+	COUNT(CASE WHEN HOUR(`time`) = 6 THEN 1 END) AS `6`,
+	COUNT(CASE WHEN HOUR(`time`) = 7 THEN 1 END) AS `7`,
+	COUNT(CASE WHEN HOUR(`time`) = 8 THEN 1 END) AS `8`,
+	COUNT(CASE WHEN HOUR(`time`) = 9 THEN 1 END) AS `9`,
+	COUNT(CASE WHEN HOUR(`time`) = 10 THEN 1 END) AS `10`,
+	COUNT(CASE WHEN HOUR(`time`) = 11 THEN 1 END) AS `11`,
+	COUNT(CASE WHEN HOUR(`time`) = 12 THEN 1 END) AS `12`,
+	COUNT(CASE WHEN HOUR(`time`) = 13 THEN 1 END) AS `13`,
+	COUNT(CASE WHEN HOUR(`time`) = 14 THEN 1 END) AS `14`,
+	COUNT(CASE WHEN HOUR(`time`) = 15 THEN 1 END) AS `15`,
+	COUNT(CASE WHEN HOUR(`time`) = 16 THEN 1 END) AS `16`,
+	COUNT(CASE WHEN HOUR(`time`) = 17 THEN 1 END) AS `17`,
+	COUNT(CASE WHEN HOUR(`time`) = 18 THEN 1 END) AS `18`,
+	COUNT(CASE WHEN HOUR(`time`) = 19 THEN 1 END) AS `19`,
+	COUNT(CASE WHEN HOUR(`time`) = 20 THEN 1 END) AS `20`,
+	COUNT(CASE WHEN HOUR(`time`) = 21 THEN 1 END) AS `21`,
+	COUNT(CASE WHEN HOUR(`time`) = 22 THEN 1 END) AS `22`,
+	COUNT(CASE WHEN HOUR(`time`) = 23 THEN 1 END) AS `23`
+FROM outcome_table o
+LEFT OUTER JOIN animal_table a ON o.animalID=a.animalID
+WHERE a.type=0
+GROUP BY type
+
+CREATE VIEW outcome_time_cat AS
+SELECT 
+	o.type,
+	COUNT(CASE WHEN HOUR(`time`) = 0 THEN 1 END) AS `0`,
+	COUNT(CASE WHEN HOUR(`time`) = 1 THEN 1 END) AS `1`,
+	COUNT(CASE WHEN HOUR(`time`) = 2 THEN 1 END) AS `2`,
+	COUNT(CASE WHEN HOUR(`time`) = 3 THEN 1 END) AS `3`,
+	COUNT(CASE WHEN HOUR(`time`) = 4 THEN 1 END) AS `4`,
+	COUNT(CASE WHEN HOUR(`time`) = 5 THEN 1 END) AS `5`,
+	COUNT(CASE WHEN HOUR(`time`) = 6 THEN 1 END) AS `6`,
+	COUNT(CASE WHEN HOUR(`time`) = 7 THEN 1 END) AS `7`,
+	COUNT(CASE WHEN HOUR(`time`) = 8 THEN 1 END) AS `8`,
+	COUNT(CASE WHEN HOUR(`time`) = 9 THEN 1 END) AS `9`,
+	COUNT(CASE WHEN HOUR(`time`) = 10 THEN 1 END) AS `10`,
+	COUNT(CASE WHEN HOUR(`time`) = 11 THEN 1 END) AS `11`,
+	COUNT(CASE WHEN HOUR(`time`) = 12 THEN 1 END) AS `12`,
+	COUNT(CASE WHEN HOUR(`time`) = 13 THEN 1 END) AS `13`,
+	COUNT(CASE WHEN HOUR(`time`) = 14 THEN 1 END) AS `14`,
+	COUNT(CASE WHEN HOUR(`time`) = 15 THEN 1 END) AS `15`,
+	COUNT(CASE WHEN HOUR(`time`) = 16 THEN 1 END) AS `16`,
+	COUNT(CASE WHEN HOUR(`time`) = 17 THEN 1 END) AS `17`,
+	COUNT(CASE WHEN HOUR(`time`) = 18 THEN 1 END) AS `18`,
+	COUNT(CASE WHEN HOUR(`time`) = 19 THEN 1 END) AS `19`,
+	COUNT(CASE WHEN HOUR(`time`) = 20 THEN 1 END) AS `20`,
+	COUNT(CASE WHEN HOUR(`time`) = 21 THEN 1 END) AS `21`,
+	COUNT(CASE WHEN HOUR(`time`) = 22 THEN 1 END) AS `22`,
+	COUNT(CASE WHEN HOUR(`time`) = 23 THEN 1 END) AS `23`
+FROM outcome_table o
+LEFT OUTER JOIN animal_table a ON o.animalID=a.animalID
+WHERE a.type=1
+GROUP BY type
+
+CREATE VIEW outcome_age_dog AS
+SELECT 
+	o.type,
+	COUNT(CASE WHEN age < 8 THEN 1 END) AS `0`,
+	COUNT(CASE WHEN age < 31 AND age > 7 THEN 1 END) AS `1`,
+	COUNT(CASE WHEN age < 181 AND age > 30 THEN 1 END) AS `2`,
+	COUNT(CASE WHEN age < 366 AND age > 180 THEN 1 END) AS `3`,
+	COUNT(CASE WHEN age < 731 AND age > 365 THEN 1 END) AS `4`,
+	COUNT(CASE WHEN age < 1826 AND age > 730 THEN 1 END) AS `5`,
+	COUNT(CASE WHEN age < 3651 AND age > 1825 THEN 1 END) AS `6`,
+	COUNT(CASE WHEN age > 3650 THEN 1 END) AS `7`
+FROM animal_table a
+LEFT OUTER JOIN outcome_table o ON a.animalID=o.animalID
+WHERE a.type=0
+GROUP BY o.type
+
+CREATE VIEW outcome_age_cat AS
+SELECT 
+	o.type,
+	COUNT(CASE WHEN age < 8 THEN 1 END) AS `0`,
+	COUNT(CASE WHEN age < 31 AND age > 7 THEN 1 END) AS `1`,
+	COUNT(CASE WHEN age < 181 AND age > 30 THEN 1 END) AS `2`,
+	COUNT(CASE WHEN age < 366 AND age > 180 THEN 1 END) AS `3`,
+	COUNT(CASE WHEN age < 731 AND age > 365 THEN 1 END) AS `4`,
+	COUNT(CASE WHEN age < 1826 AND age > 730 THEN 1 END) AS `5`,
+	COUNT(CASE WHEN age < 3651 AND age > 1825 THEN 1 END) AS `6`,
+	COUNT(CASE WHEN age > 3650 THEN 1 END) AS `7`
+FROM animal_table a
+LEFT OUTER JOIN outcome_table o ON a.animalID=o.animalID
+WHERE a.type=1
+GROUP BY o.type
+
+CREATE VIEW return_dog_cat AS
+SELECT
+	count(*) num
+FROM animal_table a 
+LEFT OUTER JOIN outcome_table o ON a.animalID=o.animalID
+WHERE o.type='2'
+GROUP BY a.type
+-->
