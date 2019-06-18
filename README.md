@@ -600,7 +600,7 @@ while($row = mysqli_fetch_assoc($result)) {
 	$i += 1;
 }
 if (mysqli_num_rows($result)==0){
-	echo "<br/><br/><center><h1>No Similar Result Found</h1></center>";
+	echo "<br/><br/><center>No Similar Result Found</center>";
 	echo '<script type="text/javascript"> window.stop(); </script>';
 }else {
 	;
